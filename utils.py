@@ -6,16 +6,6 @@ from sklearn.metrics import f1_score
 import tensorflow as tf
 
 
-def check_data():
-    pass
-
-
-def check_dir(dir):
-    if type(dir) is list:
-        dir = os.path.join(*dir)
-    return dir
-
-
 def import_config():
     import sys
     # dir = os.sep.join(os.getcwd().split(os.sep)[:-1])
@@ -28,35 +18,8 @@ def import_config():
     return config
 
 
-def shuffle(filenames, seed, verbrose=False):
-    np.random.seed(seed)
-    for data_filename_shuffle in filenames:
-        data = []
-        with open(data_filename_shuffle, 'r') as source:
-            first = True
-            for line in source:
-                if first:
-                    data.append((-1, line))
-                    first = False
-                else:
-                    data.append((np.random.randint(10e7), line))
-        data.sort()
-        with open(data_filename_shuffle, 'w') as target:
-            for _, line in data:
-                target.write(line)
-        if verbrose:
-            print("done shuffle", data_filename_shuffle)
-
-
 def pickle_save(obj, name):
     pickle.dump(obj, open(os.path.join("data", "temp_save", name), "wb"))
-
-
-def check_for_uppers(word):
-    for letter in word:
-        if letter.isupper():
-            return True
-    return False
 
 
 def file_len(fname):
@@ -65,21 +28,6 @@ def file_len(fname):
         for _ in f:
             i += 1
     return i + 1
-
-
-def find_latest(data_filename):
-    files = glob.glob(data_filename)
-    # print(files)
-    _time = 0
-    cur_file = ''
-    for file in files:
-        c_time = os.path.getmtime(file)
-        if _time < c_time:
-            print(_time, c_time)
-            cur_file = file
-            _time = c_time
-    print("going to use:", cur_file)
-    return cur_file
 
 
 def get_f_score(mdl, train):
@@ -95,7 +43,6 @@ def get_f_score(mdl, train):
     pickle_save([y_pred_total, f_score_tf], "tf_f1_score")
     pass
 
-
     # _, y_tf = mdl.predict(x=X_, seq_len=seq_len_)
     # f1_score_sk = []
     # y_reshape = np.ndarray.flatten(y_)
@@ -108,16 +55,6 @@ def get_f_score(mdl, train):
     # print(f1_score_sk, f1_score_tf)
     # total.append([*f1_score_sk, f1_score_tf])
 import tensorflow as tf
-
-
-def make_layers(layers, dropout, name):
-    with tf.variable_scope(name):
-        cells = [tf.contrib.rnn.BasicLSTMCell(i) for i in layers]
-        multi_encoder_cell = tf.contrib.rnn.MultiRNNCell(cells)
-        if dropout:
-            multi_encoder_cell = tf.contrib.rnn.DropoutWrapper(
-                multi_encoder_cell, input_keep_prob=dropout, output_keep_prob=dropout)
-    return multi_encoder_cell
 
 
 def xavier_init(size):

@@ -2,22 +2,11 @@ import utils
 import argparse
 import tensorflow as tf
 import os
-from dataclass import data
+from dataclass import mnist_data
 from modelclass import model
 from metrics import f_score_tf
 
-
-class EvalCheckpointSaverListener(tf.train.CheckpointSaverListener):
-    def __init__(self, estimator, input_fn, name):
-        self.estimator = estimator
-        self.input_fn = input_fn
-        self.name = name
-
-    def after_save(self, session, global_step):
-        print("RUNNING EVAL: {}".format(self.name))
-        self.estimator.evaluate(self.input_fn, name=self.name)
-        print("FINISHED EVAL: {}".format(self.name))
-
+CONFIG = utils.import_config()
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(
@@ -34,62 +23,56 @@ if __name__ == '__main__':
                         default=3, help="The number of layers of lstm.")
     parser.add_argument("--learning_rate", type=float,
                         default=0.001, help="The learning rate for training.")
-    parser.add_argument("--bw_lstm", type=bool,
-                        default=False, help="Whether to use backwards lstm cells.")
-    parser.add_argument("--fw_lstm", type=bool,
-                        default=False, help="Whether to use forward lstm cells.")
     parser.add_argument("--dropout", type=float,
                         default=0.5, help="The dropout percentage to keep. 0 is no dropout.")
     parser.add_argument("--simple", type=bool,
                         default=False, help="Whether to use a simple dnn.")
-    params = vars(parser.parse_args())
+    parser.add_argument("--baseline", type=bool,
+                        default=False, help="Whether to make a baseline.")
+    params = parser.parse_args()
 
-    params["dense_size"] = data.STATIC_DS["dense_size"]
-    params["sparse_size"] = data.STATIC_DS["sparse_size"]
-    params["num_entities"] = data.STATIC_DS["num_entities"]
-    params["entities"] = data.STATIC_DS["entities"]
+    filepath = mnist_data.download(CONFIG)
+
     # Feature columns describe how to use the input.
     my_feature_columns = []
 
-    if params["simple"]:
-        params["max_words"] = 3
-        sizes = {
-            "Dense": [params["max_words"] * data.STATIC_DS["dense_size"]],
-            "Sparse": [params["max_words"] * data.STATIC_DS["sparse_size"]],
-            "seq_len": [1],
-            "label": [1]
-        }
-    else:
-        sizes = {
-            "Dense": [params["max_words"], data.STATIC_DS["dense_size"]],
-            "Sparse": [params["max_words"], data.STATIC_DS["sparse_size"]],
-            "seq_len": [1],
-            "label": [params["max_words"]]
-        }
+    sizes = {
+        "image": [28 * 28],
+        "extra": [10]
+    }
+
     print(sizes)
+
     for key in sizes:
         my_feature_columns.append(
             tf.feature_column.numeric_column(key=key, shape=sizes[key]))
 
-    params['feature_columns'] = my_feature_columns
-    # estimator = tf.estimator.LinearClassifier(
-    #     feature_columns=my_feature_columns)
+    params.feature_columns = my_feature_columns
 
-    if params["simple"]:
-        estimator = tf.estimator.DNNClassifier([params["num_units"]] * params["num_layers"],
-                                               my_feature_columns[:-2],
-                                               model_dir=params["logdir"] +
-                                               "/simple_model",
-                                               n_classes=9)
-        # estimator = tf.estimator.BaselineClassifier(
-        #     model_dir=params["logdir"] +
-        #     "/BaselineClassifier",
-        #     n_classes=9)
+    if params.baseline:
+        classifier = tf.estimator.BaselineClassifier(model_dir=params["logdir"] + "/BaselineClassifier",
+                                                     n_classes=10)
+
+    elif params.simple:
+        classifier = tf.estimator.DNNClassifier([300, 300],
+                                                my_feature_columns[0],
+                                                model_dir=params.logdir +
+                                                "/simple_model_300x300",
+                                                n_classes=10)
+    elif params.deepwide:
+        classifier = tf.estimator.DNNLinearCombinedClassifier(model_dir=params.logdir + "/deep_wide_model_300x300",
+                                                              linear_feature_columns=my_feature_columns[1],
+                                                              dnn_feature_columns=my_feature_columns[0],
+                                                              dnn_hidden_units=[
+                                                                  300, 300],
+                                                              dnn_dropout=0.5,
+                                                              n_classes=10
+                                                              )
     else:
-        estimator = tf.estimator.Estimator(model_fn=model.model_fn,
-                                           model_dir=params["logdir"] + "/" +
-                                           utils.make_name(params),
-                                           params=params)
+        classifier = tf.estimator.Estimator(model_fn=model.model_fn,
+                                            model_dir=params["logdir"] + "/" +
+                                            utils.make_name(params),
+                                            params=params)
 
     tf.logging.set_verbosity('INFO')
 
@@ -100,7 +83,7 @@ if __name__ == '__main__':
 
     train_spec = tf.estimator.TrainSpec(input_fn=lambda: data.input_fn(
         eval=False, use_validation_set=False, params=params),
-        max_steps=20000)
+        max_steps=2000)
     eval_spec = tf.estimator.EvalSpec(input_fn=lambda: data.input_fn(
         eval=True, use_validation_set=True, params=params),
         throttle_secs=60*2,
@@ -108,6 +91,6 @@ if __name__ == '__main__':
 
     tf.estimator.train_and_evaluate(estimator, train_spec, eval_spec)
 
-    results = estimator.evaluate(input_fn=data.input_fn(
-        eval=True, use_validation_set=True, params=params))
-    print(results)
+    # results = estimator.evaluate(input_fn=data.input_fn(
+    #     eval=True, use_validation_set=True, params=params))
+    # print(results)

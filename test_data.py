@@ -1,11 +1,16 @@
-from dataclass.data import get_batch
-from dataclass.data import input_fn
+# from dataclass.data import get_batch
+# from dataclass.data import input_fn
 import datetime
-from tests.utils import from_batch_to_dict_datapoint
-from tests.run_over_data import run_over_data
-from tests.details_data import Details_data
+# from tests.utils import from_batch_to_dict_datapoint
+# from tests.run_over_data import run_over_data
+# from tests.details_data import Details_data
+from dataclass import mnist_data
+
 
 if __name__ == "__main__":
+    mnist_data.download()
+    print("done")
+    """
     import argparse
     parser = argparse.ArgumentParser()
     parser.add_argument("--logdir", type=str, default="./training_results/estimator",
@@ -46,3 +51,4 @@ if __name__ == "__main__":
                   use_validation_set=True, func=fn)
 
     details_data.give_details("validationset")
+    """

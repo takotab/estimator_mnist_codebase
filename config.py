@@ -1,14 +1,18 @@
-alphabet = [abc for abc in 'abcdefghijklmnopqrstuvwxyz0123456789?']
-alphabet.append("<UNK>")
-alphabet.append("<SYN>")
-alphabet.append("<upper>")
-alphabet.append("<eou>")
 
-prep_file_dir = "E://data//enity_article_estimate//preperation_files"
+import os
+data_loc = "E://data//MNIST"
 
-config = {"CoNLL": {"train": "E://data//enity_article_estimate//CoNLLt//ned.train.CoNLLt",
-                    "val": "E://data//enity_article_estimate//CoNLLt//ned.test.CoNLLt",
-                    "settings": None},
+config = {"MNIST": {"test":
+                    {"dir": os.path.join(data_loc, "test"),
+                     "images": 't10k-images-idx3-ubyte',
+                     "labels": 't10k-labels-idx1-ubyte'},
+
+                    "train":
+                        {"dir": os.path.join(data_loc, "train"),
+                         "images": 'train-images-idx3-ubyte',
+                         "labels": 'train-labels-idx1-ubyte'},
+                    },
+
 
           "ink_file": {"dir": "E://data//enity_article_estimate//current_inky.ink",
                        "train": "E://data//enity_article_estimate//CoNLLt//current_inky.CoNLLt",
@@ -19,14 +23,8 @@ config = {"CoNLL": {"train": "E://data//enity_article_estimate//CoNLLt//ned.trai
           "CoNLLt": {"word_sep": "\t",
                      "line_sep": ". Punc O"},
 
-          "Preparation_files": {"first_name": prep_file_dir + "//list_w_first_names.txt",
-                                "last_name": prep_file_dir + "//list_w_last_names.txt",
-                                "cities": prep_file_dir + "//list_w_cities.txt",
-                                "embedding": prep_file_dir + "//nl-embedding.pckl",
-                                "lists": prep_file_dir + "//lists.pkl",
-                                "pointers": prep_file_dir + "//pointers.pkl"},
 
-          "extra_info": {"alphabet": {"info": alphabet,
+          "extra_info": {"alphabet": {"info": "alphabet",
                                       "meta": "deep"},
                          "street_part": {"info": ["straat", 'plein', 'weg', 'laan'],
                                          "meta": "both"},
