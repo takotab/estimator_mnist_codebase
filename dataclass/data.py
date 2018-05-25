@@ -1,7 +1,7 @@
 import random
 import numpy as np
 import tensorflow as tf
-from . import utils
+from . import utils  # pylint : ignore
 CONFIG = utils.import_config()
 
 
@@ -27,6 +27,7 @@ def input_fn(eval, use_validation_set, params):
 
     # 4 is arbitrary, a little prefetching helps speed things up
     ds = ds.prefetch(100)
+    ds.shuffle(60000)
 
     deep_t, wide_t, labels_t = ds.make_one_shot_iterator().get_next()
 
@@ -69,19 +70,19 @@ def get_batch(use_validation_set, params):
     """
 
     line_reader = utils.get_linereader(
-        use_validation_set, params)  # returns a IO textwrapper
+        use_validation_set, params)  # returns a iter
 
     labels, deep, wide = [], [], []
 
     while len(labels) < params.batch_size:
 
         # TODO extra bullshit class
-        line = line_reader.readline().replace("\n", "").split(",")
+        line = line_reader.next().replace("\n", "").split(",")
         labels.append(int(line[0]))
-        deep.append(np.float(line[1:]))
+        deep.append(line[1:])
         wide.append(np.random.rand(params.extra_wide_features))
 
     assert len(labels) == len(deep) == len(
         wide), "the features/labels do not have the same datapoints in a batch"
 
-    return np.array(deep),  np.array(wide),  np.array(labels)
+    return np.array(deep, dtype=float),  np.array(wide, dtype=float),  np.array(labels)

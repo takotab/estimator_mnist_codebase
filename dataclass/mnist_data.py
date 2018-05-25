@@ -72,7 +72,8 @@ def _download(directory, filename):
 
 def mnist2csv(imgf, labelf, outf, n):
     if os.path.isfile(outf):
-        return outf
+        if len((open(outf).readline()).split(",")) > 1:
+            return outf
     f = open(imgf, "rb")
     o = open(outf, "w")
     l = open(labelf, "rb")
@@ -123,6 +124,8 @@ def download():
 
         mnist2csv(images_dir, labels_dir, csv_dir,
                   CONFIG["MNIST"][test_train]["size"])
+        assert len((open(csv_dir).readline()).split(",")
+                   ) > 1, "The MNIST " + test_train + " dataset is not the right size"
 
 
 if __name__ == "__main__":

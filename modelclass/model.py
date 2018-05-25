@@ -33,13 +33,13 @@ def model_fn(features, labels, mode, params):
     logits = make_model(deep_t, wide_t, params, mode)
 
     predicted_classes = tf.argmax(logits, -1)
-
+    predictions = {
+        'class_ids': predicted_classes[:, tf.newaxis],
+        'probabilities': tf.nn.softmax(logits),
+        'logits': logits,
+    }
     if mode == tf.estimator.ModeKeys.PREDICT:
-        predictions = {
-            'class_ids': predicted_classes[:, tf.newaxis],
-            'probabilities': tf.nn.softmax(logits),
-            'logits': logits,
-        }
+
         return tf.estimator.EstimatorSpec(mode, predictions=predictions)
 
     # Compute loss.
@@ -51,7 +51,7 @@ def model_fn(features, labels, mode, params):
 
     if mode == tf.estimator.ModeKeys.EVAL:
         return tf.estimator.EstimatorSpec(
-            mode, loss=loss, eval_metric_ops=metric_ops)
+            mode, loss=loss, eval_metric_ops=metric_ops, predictions=predictions)
 
     # Create training op.
     assert mode == tf.estimator.ModeKeys.TRAIN

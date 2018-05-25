@@ -17,10 +17,24 @@ def get_linereader(use_validation_set, params):
 
     if params.train_reader is None:  # first call
         config = import_config()
-        params.val_reader = open(config["MNIST"]["test"]["csv"], "r")
-        params.train_reader = open(config["MNIST"]["train"]["csv"], "r")
+        params.val_reader = reader(config["MNIST"]["test"]["csv"])
+        params.train_reader = reader(config["MNIST"]["train"]["csv"])
 
     if use_validation_set:
         return params.val_reader
     else:
         return params.train_reader
+
+
+class reader:
+    def __init__(self, filedir):
+        self.filedir = filedir
+        self.f = open(filedir, "r")
+
+    def next(self):
+        line = self.f.readline()
+        if not line:
+            self.f.close()
+            self.f = open(self.filedir, "r")
+            line = self.f.readline()
+        return(line)

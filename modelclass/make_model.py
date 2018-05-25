@@ -1,5 +1,5 @@
 import tensorflow as tf
-from . import utils  # pylint:ignore
+from . import utils  # pylint : ignore
 
 
 def make_model(deep_t, wide_t, params, mode):

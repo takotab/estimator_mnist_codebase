@@ -6,7 +6,7 @@ ENTITIES = [str(i) for i in range(10)]
 def extra_metrics(labels, predictions):
     # https://stackoverflow.com/a/48452770/6950549
     if type(predictions) is dict:
-        predictions = tf.cast(predictions["classes"], tf.int64)
+        predictions = tf.cast(predictions["class_ids"], tf.int64)
     metric_ops = {}
     n = len(ENTITIES)
     recall = [0] * n
@@ -50,9 +50,14 @@ def extra_metrics(labels, predictions):
     f_score_stacked = tf.stack(f_score)
     f_score_total = tf.metrics.mean(f_score_stacked)
 
+    accuracy = tf.metrics.accuracy(labels, predictions)
+
     with tf.variable_scope("Overal_Metrics"):
         tf.summary.scalar('f_score', f_score_total[1])
+        tf.summary.scalar("Accuracy", accuracy[1])
+
     metric_ops['f_score_total'] = f_score_total
+    metric_ops['Accuracy'] = accuracy
 
     # accuracy = tf.metrics.accuracy(labels=labels,
     #                                predictions=predictions,

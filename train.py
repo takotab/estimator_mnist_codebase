@@ -82,11 +82,11 @@ if __name__ == '__main__':
 
     train_spec = tf.estimator.TrainSpec(input_fn=lambda: data.input_fn(
         eval=False, use_validation_set=False, params=params),
-        max_steps=2000)
+        max_steps=10000)
     eval_spec = tf.estimator.EvalSpec(input_fn=lambda: data.input_fn(
         eval=True, use_validation_set=True, params=params),
-        throttle_secs=60*2,
-        start_delay_secs=60*3)
+        throttle_secs=60*5,
+        start_delay_secs=60*5)
 
     tf.estimator.train_and_evaluate(classifier, train_spec, eval_spec)
 
