@@ -4,7 +4,8 @@ import tensorflow as tf
 import os
 from dataclass import mnist_data
 from modelclass import model
-from metrics import f_score_tf
+from metrics import extra_metrics
+from dataclass import data
 
 CONFIG = utils.import_config()
 
@@ -15,12 +16,6 @@ if __name__ == '__main__':
                         help="The path to the directory where models and metrics should be logged.")
     parser.add_argument("--batch_size", type=int, default=32,
                         help="The number of datapoint used in one gradient descent step.")
-    parser.add_argument("--max_words", type=int, default=100,
-                        help="The maximal number of words in sentence.")
-    parser.add_argument("--num_units", type=int, default=8,
-                        help="The number of units in the lstm layer.")
-    parser.add_argument("--num_layers", type=int,
-                        default=3, help="The number of layers of lstm.")
     parser.add_argument("--learning_rate", type=float,
                         default=0.001, help="The learning rate for training.")
     parser.add_argument("--dropout", type=float,
@@ -28,17 +23,22 @@ if __name__ == '__main__':
     parser.add_argument("--simple", type=bool,
                         default=False, help="Whether to use a simple dnn.")
     parser.add_argument("--baseline", type=bool,
-                        default=False, help="Whether to make a baseline.")
+                        default=False, help="Whether to use a baseline.")
+    parser.add_argument("--deepwide", type=bool,
+                        default=False, help="Whether to make a deepwide network.")
     params = parser.parse_args()
 
-    filepath = mnist_data.download(CONFIG)
+    mnist_data.download()
+    params.train_reader = None
+    params.val_reader = None
 
+    params.extra_wide_features = 25
     # Feature columns describe how to use the input.
     my_feature_columns = []
 
     sizes = {
-        "image": [28 * 28],
-        "extra": [10]
+        "Deep": [28 * 28],
+        "Wide": [params.extra_wide_features]
     }
 
     print(sizes)
@@ -70,15 +70,14 @@ if __name__ == '__main__':
                                                               )
     else:
         classifier = tf.estimator.Estimator(model_fn=model.model_fn,
-                                            model_dir=params["logdir"] + "/" +
-                                            utils.make_name(params),
+                                            model_dir=params.logdir + "/custom_model_fn",
                                             params=params)
 
     tf.logging.set_verbosity('INFO')
 
-    estimator = tf.contrib.estimator.add_metrics(  # pylint: ignore
-        estimator,
-        f_score_tf
+    classifier = tf.contrib.estimator.add_metrics(  # pylint: ignore
+        classifier,
+        extra_metrics
     )
 
     train_spec = tf.estimator.TrainSpec(input_fn=lambda: data.input_fn(
@@ -89,7 +88,7 @@ if __name__ == '__main__':
         throttle_secs=60*2,
         start_delay_secs=60*3)
 
-    tf.estimator.train_and_evaluate(estimator, train_spec, eval_spec)
+    tf.estimator.train_and_evaluate(classifier, train_spec, eval_spec)
 
     # results = estimator.evaluate(input_fn=data.input_fn(
     #     eval=True, use_validation_set=True, params=params))

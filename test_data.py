@@ -17,8 +17,6 @@ if __name__ == "__main__":
                         help="The path to the directory where models and metrics should be logged.")
     parser.add_argument("--batch_size", type=int, default=32,
                         help="The number of datapoint used in one gradient descent step.")
-    parser.add_argument("--max_words", type=int, default=100,
-                        help="The maximal number of words in sentence.")
     parser.add_argument("--use_tf", type=bool, default=False,
                         help="this way it is easier to find and fix bugs")
 

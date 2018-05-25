@@ -67,6 +67,32 @@ def _download(directory, filename):
     os.remove(zipped_filepath)
     return filepath
 
+# https://pjreddie.com/projects/mnist-in-csv/
+
+
+def mnist2csv(imgf, labelf, outf, n):
+    if os.path.isfile(outf):
+        return outf
+    f = open(imgf, "rb")
+    o = open(outf, "w")
+    l = open(labelf, "rb")
+
+    f.read(16)
+    l.read(8)
+    images = []
+
+    for _ in range(n):
+        image = [ord(l.read(1))]
+        for __ in range(28*28):
+            image.append(ord(f.read(1)))
+        images.append(image)
+
+    for image in images:
+        o.write(",".join(str(pix) for pix in image)+"\n")
+    f.close()
+    o.close()
+    l.close()
+
 # made by me
 
 
@@ -82,14 +108,21 @@ def download():
 
         images_file = CONFIG["MNIST"][test_train]["images"]
         images_dir = _download(directory, images_file)
-        check_image_file_header(images_dir)
+        # check_image_file_header(images_dir)
 
         labels_file = CONFIG["MNIST"][test_train]["labels"]
         labels_dir = _download(directory, labels_file)
-        check_labels_file_header(labels_dir)
+        # check_labels_file_header(labels_dir)
 
         CONFIG["MNIST"][test_train]["labels_dir"] = labels_dir
         CONFIG["MNIST"][test_train]["images_dir"] = images_dir
+
+        csv_dir = os.path.join(
+            directory, "mnist_"+test_train+".csv")
+        CONFIG["MNIST"][test_train]["csv"] = csv_dir
+
+        mnist2csv(images_dir, labels_dir, csv_dir,
+                  CONFIG["MNIST"][test_train]["size"])
 
 
 if __name__ == "__main__":

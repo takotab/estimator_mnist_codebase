@@ -1,9 +1,9 @@
 import tensorflow as tf
 import utils
-ENTITIES = utils.import_config()["ink_file"]["settings"]["entities"]
+ENTITIES = [str(i) for i in range(10)]
 
 
-def f_score_tf(labels, predictions):
+def extra_metrics(labels, predictions):
     # https://stackoverflow.com/a/48452770/6950549
     if type(predictions) is dict:
         predictions = tf.cast(predictions["classes"], tf.int64)
@@ -53,4 +53,11 @@ def f_score_tf(labels, predictions):
     with tf.variable_scope("Overal_Metrics"):
         tf.summary.scalar('f_score', f_score_total[1])
     metric_ops['f_score_total'] = f_score_total
+
+    # accuracy = tf.metrics.accuracy(labels=labels,
+    #                                predictions=predictions,
+    #                                name='acc_op')
+    # metric_ops['accuracy'] = accuracy
+    # tf.summary.scalar('accuracy', accuracy[1])
+
     return metric_ops

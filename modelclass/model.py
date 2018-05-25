@@ -10,10 +10,9 @@ def model_fn(features, labels, mode, params):
 
     Args:
       features: A dict of feature_column w/:
-            * "Dense": (batch_size, max_words, dense_size), np.float32
-            * "Sparse": (batch_size, max_words, sparse_size), np.float32
-            * "seq_len": (batch_size, 1), np.int32
-      labels: (batch_size, max_words), np.int32
+            * "Deep": (batch_size, 28*28), np.float32
+            * "Wide": (batch_size,  extra_wide_features), np.float32
+      labels: (batch_size, 1), np.int32
       mode: tf.estimator.ModeKeys.[TRAIN, EVAL, PREDICT]
       params: a Dictionary of configuration parameters
 
@@ -21,23 +20,17 @@ def model_fn(features, labels, mode, params):
       tf.estimator.EstimatorSpec
     """
 
-    dense_t = tf.feature_column.input_layer(
-        features, params['feature_columns'][0])
-    dense_t = tf.reshape(
-        dense_t, shape=(-1, params["max_words"], params["dense_size"]))
+    deep_t = tf.feature_column.input_layer(
+        features, params.feature_columns[0])
+    deep_t = tf.reshape(
+        deep_t, shape=(-1, 28, 28, 1))
 
-    sparse_t = tf.feature_column.input_layer(
-        features, params['feature_columns'][1])
-    sparse_t = tf.reshape(
-        sparse_t, shape=(-1, params["max_words"], params["sparse_size"]))
+    wide_t = tf.feature_column.input_layer(
+        features, params.feature_columns[1])
+    wide_t = tf.reshape(
+        wide_t, shape=(-1, params.extra_wide_features))
 
-    seq_len = tf.feature_column.input_layer(
-        features, params['feature_columns'][2])
-    seq_len = tf.cast(seq_len, tf.int32)
-    # label = tf.feature_column.input_layer(        features, params['feature_columns'][2])
-    # tf.feature_column.input_layer(
-    #     features, params['feature_columns'][2])
-    logits = make_model(dense_t, sparse_t, seq_len, params, mode)
+    logits = make_model(deep_t, wide_t, params, mode)
 
     predicted_classes = tf.argmax(logits, -1)
 
@@ -50,28 +43,11 @@ def model_fn(features, labels, mode, params):
         return tf.estimator.EstimatorSpec(mode, predictions=predictions)
 
     # Compute loss.
-    weight_vector = tf.sequence_mask(
-        seq_len[:, 0], dtype=tf.float32, maxlen=params["max_words"])
-    # label_t = tf.feature_column.input_layer(
-    #     labels, params['feature_columns'][3])
-    # # label_t = labels
-    label_t = tf.cast(labels, tf.int32)
-    label_t = tf.reshape(label_t, (-1, params["max_words"]))
-    print("label_t", label_t)
-    loss = tf.contrib.seq2seq.sequence_loss(logits=logits,  # pylint:ignore
-                                            targets=label_t,
-                                            weights=weight_vector,
-                                            name="calc_loss"
-                                            )
+    loss = tf.losses.sparse_softmax_cross_entropy(labels=labels, logits=logits)
 
     # Compute evaluation metrics.
-    accuracy = tf.metrics.accuracy(labels=label_t,
-                                   predictions=predicted_classes,
-                                   name='acc_op')
-    metric_ops = {'accuracy': accuracy}
-    tf.summary.scalar('accuracy', accuracy[1])
 
-    metric_ops.update(metrics.f_score_tf(label_t, predicted_classes))
+    metric_ops = metrics.extra_metrics(labels, predicted_classes)
 
     if mode == tf.estimator.ModeKeys.EVAL:
         return tf.estimator.EstimatorSpec(
@@ -80,7 +56,7 @@ def model_fn(features, labels, mode, params):
     # Create training op.
     assert mode == tf.estimator.ModeKeys.TRAIN
 
-    train_op = tf.train.AdamOptimizer(learning_rate=params["learning_rate"]).minimize(
+    train_op = tf.train.AdamOptimizer(learning_rate=params.learning_rate).minimize(
         loss, global_step=tf.train.get_global_step())
 
     print("Trainable variables", np.sum(
