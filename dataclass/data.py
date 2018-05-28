@@ -84,5 +84,7 @@ def get_batch(use_validation_set, params):
 
     assert len(labels) == len(deep) == len(
         wide), "the features/labels do not have the same datapoints in a batch"
-
-    return np.array(deep, dtype=float),  np.array(wide, dtype=float),  np.array(labels)
+    deep = np.array(deep, dtype=float)
+    wide = np.array(wide, dtype=float)
+    label = np.array(labels)[:, np.newaxis]
+    return deep, wide, label

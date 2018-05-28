@@ -15,7 +15,7 @@ def conv_2d(X, channels, name=""):
         #     inputs=conv, units=channels, activation=tf.nn.relu)
         # Pooling Layer #1
         pool = tf.layers.max_pooling2d(
-            inputs=relu, pool_size=[2, 2], strides=2)
+            inputs=conv, pool_size=[2, 2], strides=2)
 
     return pool
 

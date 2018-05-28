@@ -21,7 +21,7 @@ if __name__ == '__main__':
     parser.add_argument("--dropout", type=float,
                         default=0.5, help="The dropout percentage to keep. 0 is no dropout.")
     parser.add_argument("--simple", type=bool,
-                        default=False, help="Whether to use a simple dnn.")
+                        default=True, help="Whether to use a simple dnn.")
     parser.add_argument("--baseline", type=bool,
                         default=False, help="Whether to use a baseline.")
     parser.add_argument("--deepwide", type=bool,
@@ -50,19 +50,22 @@ if __name__ == '__main__':
     params.feature_columns = my_feature_columns
 
     if params.baseline:
-        classifier = tf.estimator.BaselineClassifier(model_dir=params["logdir"] + "/BaselineClassifier",
+        classifier = tf.estimator.BaselineClassifier(model_dir=params.logdir + "/BaselineClassifier",
                                                      n_classes=10)
 
     elif params.simple:
-        classifier = tf.estimator.DNNClassifier([300, 300],
-                                                my_feature_columns[0],
+        classifier = tf.estimator.DNNClassifier(hidden_units=[300, 300],
+                                                feature_columns=[
+                                                    my_feature_columns[0]],
                                                 model_dir=params.logdir +
                                                 "/simple_model_300x300",
                                                 n_classes=10)
     elif params.deepwide:
         classifier = tf.estimator.DNNLinearCombinedClassifier(model_dir=params.logdir + "/deep_wide_model_300x300",
-                                                              linear_feature_columns=my_feature_columns[1],
-                                                              dnn_feature_columns=my_feature_columns[0],
+                                                              linear_feature_columns=[
+                                                                  my_feature_columns[1]],
+                                                              dnn_feature_columns=[
+                                                                  my_feature_columns[0]],
                                                               dnn_hidden_units=[
                                                                   300, 300],
                                                               dnn_dropout=0.5,

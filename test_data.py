@@ -26,7 +26,7 @@ def run_over_data(params, fn_to_get_batch, name="trainingset", use_validation_se
                 assert _batch[0]["Deep"].shape[1] is 748
 
             if func is not None:
-                func(_batch)
+                func(_batch, params.use_tf)
 
             if i % 5 is 0 and i is not 0:
                 run_time = datetime.datetime.now() - start_time
