@@ -7,12 +7,12 @@ def conv_2d(X, channels, name=""):
         conv = tf.layers.conv2d(
             inputs=X,
             filters=channels,
-            kernel_size=[5, 5],
+            kernel_size=[7, 7],
             padding="same",
             activation=tf.nn.relu)
         # RELU Layer
-        relu = tf.layers.dense(
-            inputs=conv, units=channels, activation=tf.nn.relu)
+        # relu = tf.layers.dense(
+        #     inputs=conv, units=channels, activation=tf.nn.relu)
         # Pooling Layer #1
         pool = tf.layers.max_pooling2d(
             inputs=relu, pool_size=[2, 2], strides=2)
