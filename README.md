@@ -1,4 +1,4 @@
-# Tensorflow Estimator Codebase (MNIST)
+# Tensorflow Estimator Quickstart Code (MNIST)
 This repository is made as a starting point for an ML project using the Estimator API in Tensorflow.  I wanted to make the use of the Estimator API so clear as possible. I did not choice to use the fastest data input options instead I opted to use an method that can be easily adopted to use for any other goal.
 
 For other tuturials please check https://github.com/GoogleCloudPlatform/tf-estimator-tutorials. 
@@ -9,7 +9,7 @@ Required packages:
 
 - Tensorflow
 
-You can download the repository via `git clone https://github.com/takotab/-estimator_mnist_example` and run by using ` python train.py`. There are settings you can change in [train.py](train.py) or in [config.py](config.py).
+You can download the repository via `git clone https://github.com/takotab/estimator_quickstart_code` and run by using ` python train.py`. There are settings you can change in [train.py](train.py) or in [config.py](config.py).
 
 ## Models
 
