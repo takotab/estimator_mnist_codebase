@@ -27,6 +27,11 @@ There are 4 models:
 
 Three are premade Estimators by Tensorflow. And one is a custom model made by me. It easy to change the these Estimators for other (premade) Estimators.  To showcase some additional features I also added custom (random) features. The number of these extra wide features can be changed with `params.extra_wide_features` in [train.py](train.py). 
 
+## Data
+
+I used the [MNIST dataset](http://yann.lecun.com/exdb/mnist/) to showcase the different models. In this dataset the goal is classify a handwritten digit. To showcase some additional features I also added custom (random) features. You can edit their creation in [data.py](dataclass/data.py).
+
+
 For instance:
 
 swap: 
@@ -37,9 +42,6 @@ for:
 ` wide.append(np.random.rand(params.extra_wide_features) * int(line[0]) * 0.1)`
 
 
-## Data
-
-I used the [MNIST dataset](http://yann.lecun.com/exdb/mnist/) to showcase the different models. In this dataset the goal is classify a handwritten digit. To showcase some additional features I also added custom (random) features. You can edit their creation in [data.py](dataclass/data.py).
 
 ## Results
 
