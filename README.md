@@ -45,8 +45,22 @@ Here you see the log of the cost during training against the the number of itera
 You see the Custom model preforms much better. It is however good to also see the same graph against time:
 ![loss_time.png](loss_time.png)
 
-The run time of the custum model is circa 15 times longer than the other models. This shows the relevancy of the premade simple models. This runtime difference is also visible in the graph showing the number of global steps per second over the training:
+The run time of the custum model is circa 15 times longer than the other models. This shows the relevancy of the premade simpler models. This runtime difference is also visible in the graph showing the number of global steps per second over the training:
 
 ![global_step_time.png](global_step_sec.png)
 
+## Usage Tips
 
+Start with the data and get a result as soon as possible.  When doing a machine learning project the data more important than your model. Peter Warden wrote a nice [post](https://petewarden.com/2018/05/28/why-you-need-to-improve-your-training-data-and-how-to-do-it/) about this. In practice this means that you want to get a result early and then make your model more complicated one step at the time. This way you can see what works and have a quicker estimate what the bottleneck is.
+
+This means:
+- edit [data.py](data.py) to incoporate your dataset
+- run all the model (`python train.py`)
+- See results in Tensorboard (`tensorboard --logdir .\trainings_results`)
+- Decide where to focus (data or model)
+
+## Future improvements
+
+- Possiblity for quick data input tf.dataset.map()
+- Custom RNN
+- Different dataset ([affNIST](http://www.cs.toronto.edu/~tijmen/affNIST/))
