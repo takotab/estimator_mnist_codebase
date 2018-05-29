@@ -76,14 +76,18 @@ def get_batch(use_validation_set, params):
 
     while len(labels) < params.batch_size:
 
-        # TODO extra bullshit class
+        # get next line in csv file
         line = line_reader.next().replace("\n", "").split(",")
+        # first column is label
         labels.append(int(line[0]))
+        # the others are the pixel values of the digit
         deep.append(line[1:])
+        # making other random features
         wide.append(np.random.rand(params.extra_wide_features))
 
     assert len(labels) == len(deep) == len(
         wide), "the features/labels do not have the same datapoints in a batch"
+
     deep = np.array(deep, dtype=float)
     wide = np.array(wide, dtype=float)
     label = np.array(labels)[:, np.newaxis]

@@ -2,6 +2,7 @@ import tensorflow as tf
 
 
 def conv_2d(X, channels, name=""):
+    # makes a convolutional block inlc. a pooling layer.
     with tf.variable_scope("Conv_" + name):
         # Convolutional Layer #1
         conv = tf.layers.conv2d(

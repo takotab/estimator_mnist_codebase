@@ -15,24 +15,4 @@ config = {"MNIST": {"test":
                          "size": 60000},
                     },
 
-
-          "ink_file": {"dir": "E://data//enity_article_estimate//current_inky.ink",
-                       "train": "E://data//enity_article_estimate//CoNLLt//current_inky.CoNLLt",
-                       "val": "E://data//enity_article_estimate//CoNLLt//current_inky_val.CoNLLt",
-                       "settings": {"entities": ['ORG', 'MISC', 'PER', 'LOC'],
-                                    "intent": []}},
-
-          "CoNLLt": {"word_sep": "\t",
-                     "line_sep": ". Punc O"},
-
-
-          "extra_info": {"alphabet": {"info": "alphabet",
-                                      "meta": "deep"},
-                         "street_part": {"info": ["straat", 'plein', 'weg', 'laan'],
-                                         "meta": "both"},
-                         "Wheather_words": {"info": ['weer', 'temperatuur', 'regen'],
-                                            "meta": "sparse"},
-                         "Salutation": {"info": ['naam', "heet", 'mr', 'mvr'],
-                                        "meta": "sparse"},
-                         }
           }

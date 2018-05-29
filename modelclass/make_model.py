@@ -3,7 +3,8 @@ from . import utils  # pylint : ignore
 
 
 def make_model(deep_t, wide_t, params, mode):
-
+    # Makes the custom model.
+    # Design is the same as showcased on https://www.tensorflow.org/tutorials/layers
     X = utils.batch_norm(deep_t, mode=mode)
 
     X = utils.conv_2d(X, 32, "1")

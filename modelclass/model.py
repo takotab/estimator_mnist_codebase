@@ -14,7 +14,7 @@ def model_fn(features, labels, mode, params):
             * "Wide": (batch_size,  extra_wide_features), np.float32
       labels: (batch_size, 1), np.int32
       mode: tf.estimator.ModeKeys.[TRAIN, EVAL, PREDICT]
-      params: a Dictionary of configuration parameters
+      params: a Dictionary-like of configuration parameters
 
     Returns:
       tf.estimator.EstimatorSpec

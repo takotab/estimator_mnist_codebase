@@ -21,18 +21,22 @@ if __name__ == '__main__':
     parser.add_argument("--dropout", type=float,
                         default=0.5, help="The dropout percentage to keep. 0 is no dropout.")
     parser.add_argument("--simple", type=bool,
-                        default=True, help="Whether to use a simple dnn.")
+                        default=False, help="Whether to use a simple dnn.")
     parser.add_argument("--baseline", type=bool,
-                        default=False, help="Whether to use a baseline.")
+                        default=True, help="Whether to use a baseline.")
     parser.add_argument("--deepwide", type=bool,
-                        default=False, help="Whether to make a deepwide network.")
+                        default=True, help="Whether to use a deepwide network.")
+    parser.add_argument("--custom", type=bool,
+                        default=True, help="Whether to use the custom network.")
     params = parser.parse_args()
 
     mnist_data.download()
     params.train_reader = None
     params.val_reader = None
 
+    # the number of extra wide features. Currently (pseudo) randomly generatate values between [0, 1).
     params.extra_wide_features = 25
+
     # Feature columns describe how to use the input.
     my_feature_columns = []
 
@@ -49,49 +53,58 @@ if __name__ == '__main__':
 
     params.feature_columns = my_feature_columns
 
+    classifiers = []
     if params.baseline:
-        classifier = tf.estimator.BaselineClassifier(model_dir=params.logdir + "/BaselineClassifier",
-                                                     n_classes=10)
+        baseline = tf.estimator.BaselineClassifier(model_dir=params.logdir + "/BaselineClassifier",
+                                                   n_classes=10)
+        classifiers.append((baseline, 1))
 
-    elif params.simple:
-        classifier = tf.estimator.DNNClassifier(hidden_units=[300, 300],
-                                                feature_columns=[
-                                                    my_feature_columns[0]],
-                                                model_dir=params.logdir +
-                                                "/simple_model_300x300",
-                                                n_classes=10)
-    elif params.deepwide:
-        classifier = tf.estimator.DNNLinearCombinedClassifier(model_dir=params.logdir + "/deep_wide_model_300x300",
-                                                              linear_feature_columns=[
-                                                                  my_feature_columns[1]],
-                                                              dnn_feature_columns=[
-                                                                  my_feature_columns[0]],
-                                                              dnn_hidden_units=[
-                                                                  300, 300],
-                                                              dnn_dropout=0.5,
-                                                              n_classes=10
-                                                              )
-    else:
-        classifier = tf.estimator.Estimator(model_fn=model.model_fn,
-                                            model_dir=params.logdir + "/custom_model_fn",
-                                            params=params)
+    if params.simple:
+        simple = tf.estimator.DNNClassifier(hidden_units=[300, 300],
+                                            feature_columns=[
+            my_feature_columns[0]],
+            model_dir=params.logdir +
+            "/simple_model_300x300",
+            n_classes=10)
+        classifiers.append((simple, 10000))
+
+    if params.deepwide:
+        deepwide = tf.estimator.DNNLinearCombinedClassifier(model_dir=params.logdir + "/deep_wide_model_300x300",
+                                                            linear_feature_columns=[
+                                                                my_feature_columns[1]],
+                                                            dnn_feature_columns=[
+                                                                my_feature_columns[0]],
+                                                            dnn_hidden_units=[
+                                                                300, 300],
+                                                            dnn_dropout=0.5,
+                                                            n_classes=10
+                                                            )
+        classifiers.append((deepwide, 1000))
+
+    if params.custom:
+        custom = tf.estimator.Estimator(model_fn=model.model_fn,
+                                        model_dir=params.logdir + "/custom_model_fn",
+                                        params=params)
+        classifiers.append((custom, 20000))
 
     tf.logging.set_verbosity('INFO')
 
-    classifier = tf.contrib.estimator.add_metrics(  # pylint: ignore
-        classifier,
-        extra_metrics
-    )
+    for classifier, max_steps in classifiers:
+        classifier = tf.contrib.estimator.add_metrics(  # pylint: ignore
+            classifier,
+            extra_metrics
+        )
 
-    train_spec = tf.estimator.TrainSpec(input_fn=lambda: data.input_fn(
-        eval=False, use_validation_set=False, params=params),
-        max_steps=20000)
-    eval_spec = tf.estimator.EvalSpec(input_fn=lambda: data.input_fn(
-        eval=True, use_validation_set=True, params=params),
-        throttle_secs=60*10,
-        start_delay_secs=60*5)
+        train_spec = tf.estimator.TrainSpec(input_fn=lambda: data.input_fn(
+            eval=False, use_validation_set=False, params=params),
+            max_steps=max_steps)
 
-    tf.estimator.train_and_evaluate(classifier, train_spec, eval_spec)
+        eval_spec = tf.estimator.EvalSpec(input_fn=lambda: data.input_fn(
+            eval=True, use_validation_set=True, params=params),
+            throttle_secs=60*10,
+            start_delay_secs=60*5)
+
+        tf.estimator.train_and_evaluate(classifier, train_spec, eval_spec)
 
     # results = estimator.evaluate(input_fn=data.input_fn(
     #     eval=True, use_validation_set=True, params=params))

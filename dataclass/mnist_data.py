@@ -122,6 +122,7 @@ def download():
             directory, "mnist_"+test_train+".csv")
         CONFIG["MNIST"][test_train]["csv"] = csv_dir
 
+        # makes the csv file of the data.
         mnist2csv(images_dir, labels_dir, csv_dir,
                   CONFIG["MNIST"][test_train]["size"])
         assert len((open(csv_dir).readline()).split(",")
