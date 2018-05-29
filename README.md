@@ -1,7 +1,7 @@
-# estimator_mnist_example
-This is an example of using the Estimator API in tensorflow. In this example I wanted to make the use of the Estimator API so clear as possible. I did not choice to use the fastest datainput instead I opted to use an method that can be easily adopted to use for any other goal.
+# Tensorflow Estimator Codebase (MNIST)
+This repository is made as a starting point for an ML project. This is an starting point for using the Estimator API in Tensorflow. In this example I wanted to make the use of the Estimator API so clear as possible. I did not choice to use the fastest datainput instead I opted to use an method that can be easily adopted to use for any other goal.
 
-For other tuturials please check https://github.com/GoogleCloudPlatform/tf-estimator-tutorials. This repository is made as a starting point for an ML project.
+For other tuturials please check https://github.com/GoogleCloudPlatform/tf-estimator-tutorials. 
 
 ## Requirements and installation
 
@@ -40,13 +40,13 @@ I have run the models and found some intresseting results. First the resulting a
 The Custom model with Convolutional parts out preforms the others. However the the Deep & Wide does preform worse compared with the DNN. The DNN parts of both are the same and since the extra info the Deep & Wide gets is not relevant you would hypothocis they should preform equal. Espessaily when the weights accociated with the wide features are approximate 0 (as they should be).
 
 Here you see the log of the cost during training against the the number of iteration:
-![loss][loss.png]
+![loss.png][loss.png]
 
 You see the Custom model preforms much better. It is however good to also see the same graph against time:
-![loss_time][loss_time.png]
+![loss_time.png][loss_time.png]
 
 The run time of the custum model is circa 15 times longer than the other models. This shows the relevancy of the premade simple models. This runtime difference is also visible in the graph showing the number of global steps per second over the training:
 
-![global step per time][global_step_sec.png]
+![global_step_time.png][global_step_sec.png]
 
 
