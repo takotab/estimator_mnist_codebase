@@ -1,5 +1,5 @@
 # Tensorflow Estimator Codebase (MNIST)
-This repository is made as a starting point for an ML project. This is an starting point for using the Estimator API in Tensorflow. In this example I wanted to make the use of the Estimator API so clear as possible. I did not choice to use the fastest datainput instead I opted to use an method that can be easily adopted to use for any other goal.
+This repository is made as a starting point for an ML project using the Estimator API in Tensorflow.  I wanted to make the use of the Estimator API so clear as possible. I did not choice to use the fastest data input options instead I opted to use an method that can be easily adopted to use for any other goal.
 
 For other tuturials please check https://github.com/GoogleCloudPlatform/tf-estimator-tutorials. 
 
@@ -18,7 +18,7 @@ There are 4 models:
 - [Baseline](https://www.tensorflow.org/api_docs/python/tf/estimator/BaselineClassifier)
 - [Simple Neural Network](https://www.tensorflow.org/api_docs/python/tf/estimator/DNNClassifier)
 - [Deep & Wide](https://www.tensorflow.org/api_docs/python/tf/estimator/DNNLinearCombinedClassifier)
-- (Custom)[model.py]
+- [Custom](model.py)
 
 Three are premade Estimators by Tensorflow. And one is a custom model. In the current code it easy to change the these Estimators for other (premade) Estimators. It is highly adviced to try to fit your problem in one of the premade Estimators. Building a custum estimator is much more work. 
 
@@ -61,6 +61,6 @@ This means:
 
 ## Future improvements
 
-- Possiblity for quick data input tf.dataset.map()
+- Possiblity for faster data input ([`tf.data.TextLineDataset`](https://www.tensorflow.org/api_docs/python/tf/data/TextLineDataset))
 - Custom RNN
 - Different dataset ([affNIST](http://www.cs.toronto.edu/~tijmen/affNIST/))
