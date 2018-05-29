@@ -81,4 +81,5 @@ This means:
 - Possiblity for faster data input ([`tf.data.TextLineDataset`](https://www.tensorflow.org/api_docs/python/tf/data/TextLineDataset))
 - Custom RNN
 - Different dataset ([affNIST](http://www.cs.toronto.edu/~tijmen/affNIST/))
+- add a [capsule network](https://arxiv.org/abs/1710.09829) model
 
