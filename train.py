@@ -12,7 +12,7 @@ CONFIG = utils.import_config()
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(
         formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-    parser.add_argument("--logdir", type=str, default="./training_results/estimator",
+    parser.add_argument("--logdir", type=str, default="./training_results/",
                         help="The path to the directory where models and metrics should be logged.")
     parser.add_argument("--batch_size", type=int, default=32,
                         help="The number of datapoint used in one gradient descent step.")
@@ -30,7 +30,8 @@ if __name__ == '__main__':
                         default=True, help="Whether to use the custom network.")
     params = parser.parse_args()
 
-    mnist_data.download()
+    dataset_name = mnist_data.download()
+    params.logdir = os.path.join(params.logdir, dataset_name)
     params.train_reader = None
     params.val_reader = None
 

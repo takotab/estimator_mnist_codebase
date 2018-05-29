@@ -1,5 +1,5 @@
 # Tensorflow Estimator Quickstart Code (MNIST)
-This repository is made as a starting point for an ML project using the Estimator API in Tensorflow.  I wanted to make the use of the Estimator API so clear as possible. I did not choice to use the fastest data input options instead I opted to use an method that can be easily adopted to use for any other goal.
+This repository shows as clear as possible the Tensorflow Estimator API. This example focuses on clarity. It is absolutely not about being fast. But you should be able to use this repository for any other goal.
 
 For other tuturials please check https://github.com/GoogleCloudPlatform/tf-estimator-tutorials. 
 
@@ -9,7 +9,12 @@ Required packages:
 
 - Tensorflow
 
-You can download the repository via `git clone https://github.com/takotab/estimator_quickstart_code` and run by using ` python train.py`. There are settings you can change in [train.py](train.py) or in [config.py](config.py).
+To run this with the MINST dataset:
+ - download the repository via `git clone https://github.com/takotab/estimator_quickstart_code`
+ - change line 3 in [config.py](config.py) `data_loc = "E:\\data\\MNIST"  # CHANGE this` to a location on your computer where you want to store the data. 
+ - run by using `python train.py`. 
+ 
+There are other settings you can change in [train.py](train.py) or in [config.py](config.py).
 
 ## Models
 
@@ -18,13 +23,23 @@ There are 4 models:
 - [Baseline](https://www.tensorflow.org/api_docs/python/tf/estimator/BaselineClassifier)
 - [Simple Neural Network](https://www.tensorflow.org/api_docs/python/tf/estimator/DNNClassifier)
 - [Deep & Wide](https://www.tensorflow.org/api_docs/python/tf/estimator/DNNLinearCombinedClassifier)
-- [Custom](model.py)
+- [Custom](modelclass/model.py)
 
-Three are premade Estimators by Tensorflow. And one is a custom model. In the current code it easy to change the these Estimators for other (premade) Estimators. It is highly adviced to try to fit your problem in one of the premade Estimators. Building a custum estimator is much more work. 
+Three are premade Estimators by Tensorflow. And one is a custom model made by me. It easy to change the these Estimators for other (premade) Estimators.  To showcase some additional features I also added custom (random) features. The number of these extra wide features can be changed with `params.extra_wide_features` in [train.py](train.py). 
+
+For instance:
+
+swap: 
+`wide.append(np.random.rand(params.extra_wide_features))` 
+
+for:
+
+` wide.append(np.random.rand(params.extra_wide_features) * int(line[0]) * 0.1)`
+
 
 ## Data
 
-I used the [MNIST dataset](http://yann.lecun.com/exdb/mnist/) to showcase the different models. In this dataset the goal is classify a handwritten digit. To showcase some additional features I also added custom (random) features. The number of these extra wide features can be changed with `params.extra_wide_features` in [train.py](train.py). You can edit their creation in [data.py](data.py).
+I used the [MNIST dataset](http://yann.lecun.com/exdb/mnist/) to showcase the different models. In this dataset the goal is classify a handwritten digit. To showcase some additional features I also added custom (random) features. You can edit their creation in [data.py](dataclass/data.py).
 
 ## Results
 
@@ -42,7 +57,7 @@ The Custom model with Convolutional parts out preforms the others. However the t
 Here you see the log of the cost during training against the the number of iteration:
 ![loss.png](loss.png)
 
-You see the Custom model preforms much better. It is however good to also see the same graph against time:
+You see the Custom model preforms much better. It is, however, good to also see the same graph against time:
 ![loss_time.png](loss_time.png)
 
 The run time of the custum model is circa 15 times longer than the other models. This shows the relevancy of the premade simpler models. This runtime difference is also visible in the graph showing the number of global steps per second over the training:
@@ -59,7 +74,7 @@ This means:
 - See results in Tensorboard (`tensorboard --logdir .\trainings_results`)
 - Decide where to focus (data or model)
 
-## Future improvements
+## Possible future improvements
 
 - Possiblity for faster data input ([`tf.data.TextLineDataset`](https://www.tensorflow.org/api_docs/python/tf/data/TextLineDataset))
 - Custom RNN

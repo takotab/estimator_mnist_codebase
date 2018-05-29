@@ -1,6 +1,6 @@
 
 import os
-data_loc = "E:\\data\\MNIST"
+data_loc = "E:\\data\\MNIST"  # CHANGE this
 
 config = {"MNIST": {"test":
                     {"dir": os.path.join(data_loc, "test"),

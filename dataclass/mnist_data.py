@@ -127,6 +127,7 @@ def download():
                   CONFIG["MNIST"][test_train]["size"])
         assert len((open(csv_dir).readline()).split(",")
                    ) > 1, "The MNIST " + test_train + " dataset is not the right size"
+    return "MNIST_CSV"
 
 
 if __name__ == "__main__":
