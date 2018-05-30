@@ -10,8 +10,9 @@ Required packages:
 - Tensorflow
 
 To run this with the MINST dataset:
+
  - download the repository via `git clone https://github.com/takotab/estimator_quickstart_code`
- - change line 3 in [config.py](config.py) `data_loc = "E:\\data\\MNIST"  # CHANGE this` to a location on your computer where you want to store the data. 
+ - change line 3 in [config.py](config.py) `data_loc = "E:\\data\\MNIST"  # CHANGE this` to a location on your computer where you want to store the data. It will download the mnist dataset to that location. 
  - run by using `python train.py`. 
  
 There are other settings you can change in [train.py](train.py) or in [config.py](config.py).
@@ -78,6 +79,8 @@ This means:
 
 ## Possible future improvements
 
+- Output the errors
+- The same metrics for all the estimators
 - Possiblity for faster data input ([`tf.data.TextLineDataset`](https://www.tensorflow.org/api_docs/python/tf/data/TextLineDataset))
 - Custom RNN
 - Different dataset ([affNIST](http://www.cs.toronto.edu/~tijmen/affNIST/))

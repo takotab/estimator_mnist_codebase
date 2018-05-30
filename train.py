@@ -21,7 +21,7 @@ if __name__ == '__main__':
     parser.add_argument("--dropout", type=float,
                         default=0.5, help="The dropout percentage to keep. 0 is no dropout.")
     parser.add_argument("--simple", type=bool,
-                        default=False, help="Whether to use a simple dnn.")
+                        default=True, help="Whether to use a simple dnn.")
     parser.add_argument("--baseline", type=bool,
                         default=True, help="Whether to use a baseline.")
     parser.add_argument("--deepwide", type=bool,
@@ -58,7 +58,7 @@ if __name__ == '__main__':
     if params.baseline:
         baseline = tf.estimator.BaselineClassifier(model_dir=params.logdir + "/BaselineClassifier",
                                                    n_classes=10)
-        classifiers.append((baseline, 1))
+        classifiers.append((baseline, 10))
 
     if params.simple:
         simple = tf.estimator.DNNClassifier(hidden_units=[300, 300],
