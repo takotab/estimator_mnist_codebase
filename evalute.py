@@ -1,6 +1,13 @@
 import copy
 import os
 import tensorflow as tf
+"""
+Does not work
+Problem is that you can not call on the input_fn a second time when it has already raised a StopIteration.
+
+No good idea how to solve this.
+
+"""
 
 
 def predict_all(estimator, input_fn, result_dir=None):
@@ -27,18 +34,42 @@ def predict_all(estimator, input_fn, result_dir=None):
 
     return y_hat, result_dir
 
-# new idea put the 3 things in on file
 
+def make_eval_file(input_fn, predictions=None, predictions_dir=None, eval_dir=None):
+    if eval_dir is None:
+        eval_dir = "eval.json"
+    predictions = get_list_of_result(predictions, predictions_dir)
 
-def get_true_labels(input_fn, y_star_dir=None):
-    if y_star_dir is None:
-        y_star_dir = "true_labels.txt"
+    json = {}
+    with tf.Session() as sess:
 
-    f_w = open(y_star_dir, "w")
-    for line in f_w.readline():
-        f_w.write(line.split(',')[0] + "\n")
+        while True:
+            try:
+                batch = sess.run(input_fn())
+            except StopIteration:
+                break
+            features, labels = batch
+            # initalize json
+            if "features" not in json:
+                json["features"] = {}
+                for key in features:
+                    json["features"][key] = []
+                json["label"] = []
+                json["prediction"] = []
 
-    return y_star, y_star_dir
+            # fill the dam thing
+            for i in range(labels.shape[0]):
+
+                for key in features:
+                    json["features"][key].append(features[key][i])
+
+                json['label'].append(labels[i])
+
+                json['prediction'].append(predictions.pop(0))
+    import json
+    with open(eval_dir, "w") as f:
+        json.dump(json, f)
+    return eval_dir, json
 
 
 def evaluator(output_fn=None, labels=None, predictions=None, labels_dir=None, predictions_dir=None):
@@ -80,7 +111,7 @@ def get_list_of_result(results, result_dir):
         return results
     elif os.path.isfile(result_dir):
         with open(result_dir, "r") as f:
-            return [int(l) for l in f.readline]
+            return [int(l.replace("\n", "")) for l in f.readline]
     else:
         raise Exception()
 
@@ -146,6 +177,7 @@ if __name__ is "__main__":
     params.restart = False
     y_hat, y_hat_dir = predict_all(simple, input_fn=lambda: data.input_fn(
         eval=True, use_validation_set=True, params=params))
-    y_star, y_star_dir = get_true_labels(input_fn=lambda: data.input_fn(
-        eval=True, use_validation_set=True, params=params))
+    import
+    y_star, y_star_dir = make_eval_file(input_fn=lambda: data.input_fn(
+        eval=True, use_validation_set=True, params=params), predictions=y_hat)
     evaluator(test_output_fn, y_star, y_hat)
