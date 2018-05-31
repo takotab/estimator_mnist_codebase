@@ -24,10 +24,10 @@ def input_fn(eval, use_validation_set, params):
                                         )
     if eval:
         ds = ds.take(CONFIG["MNIST"]["test"]["size"])
-
+    else:
+        ds.shuffle(60000)
     # 4 is arbitrary, a little prefetching helps speed things up
     ds = ds.prefetch(100)
-    ds.shuffle(60000)
 
     deep_t, wide_t, labels_t = ds.make_one_shot_iterator().get_next()
 
@@ -78,6 +78,9 @@ def get_batch(use_validation_set, params):
 
         # get next line in csv file
         line = line_reader.next().replace("\n", "").split(",")
+        if line[0] is '':
+            raise StopIteration()
+
         # first column is label
         labels.append(int(line[0]))
         # the others are the pixel values of the digit
