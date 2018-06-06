@@ -52,7 +52,7 @@ def episode_batch_generator(use_validation_set, params):
         yield get_batch(use_validation_set, params)
 
 
-def get_batch(use_validation_set, params):
+def get_batch(use_validation_set, params, line_reader=None):
     """A batch of params.batch_size with datapoints
     The reason I did not use the recomened way with tf.data.FixedLengthRecordDataset
     is that I think this is much more clear what is going happening. And it is easier to adapt to other needs.
@@ -68,9 +68,9 @@ def get_batch(use_validation_set, params):
                 * "Sparse": (batch_size, max_words, sparse_size), np.float32
             * labels: (batch_size, max_words), np.int32
     """
-
-    line_reader = utils.get_linereader(
-        use_validation_set, params)  # returns a iter
+    if line_reader is None:
+        line_reader = utils.get_linereader(
+            use_validation_set, params)  # returns a iter
 
     labels, deep, wide = [], [], []
 
@@ -95,3 +95,25 @@ def get_batch(use_validation_set, params):
     wide = np.array(wide, dtype=float)
     label = np.array(labels)[:, np.newaxis]
     return deep, wide, label
+
+
+def eval_input_fn(features, labels, batch_size):
+    """An input function for evaluation or prediction"""
+
+    features = dict(features)
+    if labels is None:
+        # No labels, use only features.
+        inputs = features
+
+    else:
+        inputs = (features, labels)
+
+    # Convert the inputs to a Dataset.
+    dataset = tf.data.Dataset.from_tensor_slices(inputs)
+
+    # Batch the examples
+    assert batch_size is not None, "batch_size must not be None"
+    dataset = dataset.batch(batch_size)
+
+    # Return the dataset.
+    return dataset

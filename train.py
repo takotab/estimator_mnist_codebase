@@ -6,6 +6,8 @@ from dataclass import mnist_data
 from modelclass import model
 from metrics import extra_metrics
 from dataclass import data
+from evalute import evaluate
+
 
 CONFIG = utils.import_config()
 
@@ -107,6 +109,4 @@ if __name__ == '__main__':
 
         tf.estimator.train_and_evaluate(classifier, train_spec, eval_spec)
 
-    # results = estimator.evaluate(input_fn=data.input_fn(
-    #     eval=True, use_validation_set=True, params=params))
-    # print(results)
+        # evaluate(classifier, params, result_dir='results.json')

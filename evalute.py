@@ -1,89 +1,68 @@
+import datetime
 import copy
 import os
 import tensorflow as tf
-"""
-Does not work
-Problem is that you can not call on the input_fn a second time when it has already raised a StopIteration.
-
-No good idea how to solve this.
-
-"""
+from dataclass import data, reader, mnist_data
+from argparse import Namespace
+import utils
+import argparse
+CONFIG = utils.import_config()
 
 
-def predict_all(estimator, input_fn, result_dir=None):
+def evaluate(classifier, params, eval_dir=None, result_dir=None, wrong_fn=None, save_all=False):
     """
     Get the predictions based on the features given by the input_fn.
-
 
     The goal here was to make something that would make a folder to showall the instances where
     the model went wrong. Unfortunatly this does not work with the current version of tensorflow.
 
 
     """
+    assert result_dir is not None or wrong_fn is not None
 
-    if result_dir is None:
-        result_dir = "results.txt"
-    f_w = open(result_dir, "w")
-    y_hat = []
-    predictions = estimator.predict(input_fn, yield_single_examples=False)
-    for prediction in predictions:
-        for i in range(prediction["classes"].shape[0]):
-            y_ = prediction["classes"][i]
-            y_hat.append(int(y_))
-            f_w.write(str(y_) + "\n")
-
-    return y_hat, result_dir
-
-
-def make_eval_file(input_fn, predictions=None, predictions_dir=None, eval_dir=None):
     if eval_dir is None:
-        eval_dir = "eval.json"
-    predictions = get_list_of_result(predictions, predictions_dir)
+        eval_dir = CONFIG["MNIST"]["test"]["csv"]
 
-    json = {}
-    with tf.Session() as sess:
+    json_dict = {}
 
-        while True:
-            try:
-                batch = sess.run(input_fn())
-            except StopIteration:
-                break
-            features, labels = batch
-            # initalize json
-            if "features" not in json:
-                json["features"] = {}
-                for key in features:
-                    json["features"][key] = []
-                json["label"] = []
-                json["prediction"] = []
+    i = 0
+    start_time = datetime.datetime.now()
+    for features, labels in get_eval_data(params, eval_dir):
+        predictions = classifier.predict(
+            input_fn=lambda: data.eval_input_fn(
+                features, labels, params.batch_size),
+            yield_single_examples=False)
+        for prediction in predictions:
 
-            # fill the dam thing
-            for i in range(labels.shape[0]):
+            if result_dir is not None:
 
-                for key in features:
-                    json["features"][key].append(features[key][i])
+                json_dict = save_result(
+                    json_dict, features, labels, prediction["classes"], save_all)
 
-                json['label'].append(labels[i])
+            if wrong_fn is not None:
+                wrong_fn(labels=labels,
+                         predictions=prediction["classes"], save_all=save_all)
+        i += 1
+        print("Iteration: {} datasample: {} running time: {}".format(i, i *
+                                                                     params.batch_size, str(datetime.datetime.now() - start_time)))
 
-                json['prediction'].append(predictions.pop(0))
     import json
-    with open(eval_dir, "w") as f:
-        json.dump(json, f)
-    return eval_dir, json
+    if result_dir is not None:
+        with open(result_dir, "w") as f:
+            json.dump(json_dict, f)
+
+    return None
 
 
-def evaluator(output_fn=None, labels=None, predictions=None, labels_dir=None, predictions_dir=None):
-    if output_fn is not None:
-        assert callable(output_fn), "output_fn must be a function"
+def get_eval_data(params, eval_dir):
 
-    labels = get_list_of_result(labels, labels_dir)
-    predictions = get_list_of_result(predictions, predictions_dir)
-    conf_matrix(labels, predictions)
-
-    for label, prediction in zip(labels, predictions):
-        if label is not prediction:
-            if output_fn is not None:
-                output_fn(label, prediction)
+    line_reader = reader.Reader(False, eval_dir)
+    while True:
+        try:
+            deep, wide, label = data.get_batch(eval, params, line_reader)
+            yield {"Deep": deep, "Wide": wide}, label
+        except StopIteration:
+            raise StopIteration
 
 
 def conf_matrix(labels, predictions, str_labels=None):
@@ -106,25 +85,32 @@ def conf_matrix(labels, predictions, str_labels=None):
     plt.savefig("conf_matrix.png")
 
 
-def get_list_of_result(results, result_dir):
-    if type(results) is list:
-        return results
-    elif os.path.isfile(result_dir):
-        with open(result_dir, "r") as f:
-            return [int(l.replace("\n", "")) for l in f.readline]
-    else:
-        raise Exception()
-
-
 def test_output_fn(labels, predictions):
     print(labels, "is not", predictions)
 
 
-if __name__ is "__main__":
-    from dataclass import data
-    import argparse
-    from dataclass import mnist_data
+def save_result(json_dict, features, labels, predictions, save_all):
+    # initalize json
+    if "features" not in json_dict:
+        json_dict["features"] = {}
+        for key in features:
+            json_dict["features"][key] = []
+        json_dict["label"] = []
+        json_dict["prediction"] = []
 
+    # fill the dam thing
+    for i in range(labels.shape[0]):
+
+        if save_all or int(labels[i, 0]) is not int(predictions[i]):
+            for key in features:
+                json_dict["features"][key].append(list(features[key][i, :]))
+            json_dict['label'].append(labels[i, 0])
+            json_dict['prediction'].append(int(predictions[i]))
+
+    return json_dict
+
+
+if __name__ is "__main__":
     parser = argparse.ArgumentParser(
         formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument("--logdir", type=str, default="./training_results/",
@@ -175,9 +161,4 @@ if __name__ is "__main__":
     assert simple.latest_checkpoint() is not None, "did not found model"
 
     params.restart = False
-    y_hat, y_hat_dir = predict_all(simple, input_fn=lambda: data.input_fn(
-        eval=True, use_validation_set=True, params=params))
-    import
-    y_star, y_star_dir = make_eval_file(input_fn=lambda: data.input_fn(
-        eval=True, use_validation_set=True, params=params), predictions=y_hat)
-    evaluator(test_output_fn, y_star, y_hat)
+    evaluate(simple, params, result_dir='results.txt')

@@ -77,9 +77,16 @@ This means:
 - See results in Tensorboard (`tensorboard --logdir .\trainings_results`)
 - Decide where to focus (data or model)
 
+## Output the Errors
+
+Currently the option to save the errors is not activated but you can uncomment the last line in [train.py](train.py).
+` 
+#    evaluate(classifier, params, result_dir='results.json')
+`
+
 ## Possible future improvements
 
-- Output the errors
+- ~~Output the errors~~
 - The same metrics for all the estimators
 - Possiblity for faster data input ([`tf.data.TextLineDataset`](https://www.tensorflow.org/api_docs/python/tf/data/TextLineDataset))
 - Custom RNN
