@@ -7,7 +7,7 @@ from modelclass import model
 from metrics import extra_metrics
 from dataclass import data
 from evalute import evaluate
-
+from entity_rec import car_entities
 
 CONFIG = utils.import_config()
 
@@ -37,19 +37,13 @@ if __name__ == '__main__':
     params.train_reader = None
     params.val_reader = None
 
-    # the number of extra wide features. Currently (pseudo) randomly generatate values between [0, 1).
-    params.extra_wide_features = 25
 
-    # Feature columns describe how to use the input.
-    my_feature_columns = []
-
-    sizes = {
-        "Deep": [28 * 28],
-        "Wide": [params.extra_wide_features]
-    }
+    sizes = car_entities.FEATURE_INFO
 
     print(sizes)
 
+    # Feature columns describe how to use the input.
+    my_feature_columns = []
     for key in sizes:
         my_feature_columns.append(
             tf.feature_column.numeric_column(key=key, shape=sizes[key]))
@@ -108,5 +102,5 @@ if __name__ == '__main__':
             start_delay_secs=60*5)
 
         tf.estimator.train_and_evaluate(classifier, train_spec, eval_spec)
-
+        
         # evaluate(classifier, params, result_dir='results.json')

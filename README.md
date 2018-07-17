@@ -1,3 +1,4 @@
+from https://github.com/takotab/estimator_quickstart_code
 # Tensorflow Estimator Quickstart Code (MNIST)
 This repository shows as clear as possible the Tensorflow Estimator API. This example focuses on clarity. It is absolutely not about being fast. But you should be able to use this repository for any other goal.
 

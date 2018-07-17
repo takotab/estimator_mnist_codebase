@@ -2,8 +2,11 @@ import random
 import numpy as np
 import tensorflow as tf
 from . import utils  # pylint : ignore
-CONFIG = utils.import_config()
+from entity_rec import car_entities
+from entity_rec.embedding import Language
 
+CONFIG = utils.import_config()
+NEDERLANDS = Language()
 
 def input_fn(eval, use_validation_set, params):
     """Outputs a tuple containing a features tensor and a labels tensor
@@ -23,10 +26,10 @@ def input_fn(eval, use_validation_set, params):
                                             tf.float32, tf.float32, tf.int32)
                                         )
     if eval:
-        ds = ds.take(CONFIG["MNIST"]["test"]["size"])
+        pass # TODO: eval dataset
     else:
         ds.shuffle(60000)
-    # 4 is arbitrary, a little prefetching helps speed things up
+    # 4 is arbitrary, a little pre-fetching helps speed things up
     ds = ds.prefetch(100)
 
     deep_t, wide_t, labels_t = ds.make_one_shot_iterator().get_next()
@@ -81,12 +84,8 @@ def get_batch(use_validation_set, params, line_reader=None):
         if line[0] is '':
             raise StopIteration()
 
-        # first column is label
-        labels.append(int(line[0]))
-        # the others are the pixel values of the digit
-        deep.append(line[1:])
-        # making other random features
-        wide.append(np.random.rand(params.extra_wide_features))
+        labels, deep, wide = interpert_line(line)
+
 
     assert len(labels) == len(deep) == len(
         wide), "the features/labels do not have the same datapoints in a batch"
@@ -95,6 +94,22 @@ def get_batch(use_validation_set, params, line_reader=None):
     wide = np.array(wide, dtype=float)
     label = np.array(labels)[:, np.newaxis]
     return deep, wide, label
+
+def interpert_line(line):
+    """
+    it was:
+    # first column is label
+    labels.append(int(line[0]))
+    # the others are the pixel values of the digit
+    deep.append(line[1:])
+    # making other random features
+    wide.append(np.random.rand(params.extra_wide_features))
+    """
+    labels = line[0]
+    features = car_entities.make_features(line[1:], language = NEDERLANDS)
+    deep = features["Deep"]
+    wide = features["Wide"]
+    return labels, deep, wide
 
 
 def eval_input_fn(features, labels, batch_size):
