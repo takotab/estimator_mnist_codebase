@@ -4,33 +4,33 @@ from entity_rec.embedding import Language
 from entity_rec import sub_embedding
 
 CAR_INTENT = ["Opel Corsa",
-          "Ford fiesta",
-          "Opel Astra",
-          "Volvo V60",
-          "Tesla model S",
-          "BMW 3 Series",
-          "Ford focus",
-          "Audi A3",
-          ]
-
+              "Ford fiesta",
+              "Opel Astra",
+              "Volvo V60",
+              "Tesla model S",
+              "BMW 3 Series",
+              "Ford focus",
+              "Audi A3",
+              ]
+NUM_CLASSES = len(CAR_INTENT)
 CAR_SUB_DICT = {
-    "Tesla":1,
-    "Opel":2,
-    "BMW":3,
-    "Ford":4,
-    "Volvo":5,
-    "Corsa":6,
-    "Audi":7,
+    "Tesla": 1,
+    "Opel" : 2,
+    "BMW"  : 3,
+    "Ford" : 4,
+    "Volvo": 5,
+    "Corsa": 6,
+    "Audi" : 7,
     }
 
 max_words = 50
 FEATURE_INFO = {
-    "Deep"  : [max_words * 300],  # 300 = size of embedding
-    "Wide" : [max_words * len(CAR_SUB_DICT)],
+    "Deep": [max_words * 300],  # 300 = size of embedding
+    "Wide": [max_words * len(CAR_SUB_DICT)],
     }
 
 
-def make_features(sentence, language=None, params = None):
+def make_features(sentence, language = None, params = None):
     """
 
     :param sentence:
@@ -53,8 +53,7 @@ def make_features(sentence, language=None, params = None):
     return features
 
 
-def predict(sentence, language=None, estimator = None):
-
+def predict(sentence, language = None, estimator = None):
     if estimator is None:
         car_estimator = make_estimator()
 
@@ -64,6 +63,4 @@ def predict(sentence, language=None, estimator = None):
 
 def make_estimator():
     # TODO: restore estimator
-
-    pass
-
+    raise NotImplementedError()
