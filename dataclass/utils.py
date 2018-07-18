@@ -22,11 +22,11 @@ def get_linereader(use_validation_set, params):
         if use_validation_set:
             params.val_reader = reader.Reader(
                     params.restart,
-                    params["data_dir"]["val"],
+                    params["data_dir_val"],
                     )
         params.train_reader = reader.Reader(
                 params.restart,
-                params["data_dir"]["train"],
+                params["data_dir_train"],
                 )
 
     if use_validation_set:

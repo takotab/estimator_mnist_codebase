@@ -36,10 +36,7 @@ if __name__ == '__main__':
     params = parser.parse_args()
 
     # dataset_name = mnist_data.download()
-    params.data_dir = {}
-    params.data_dir["train"] = os.path.join(
-            os.getcwd(),
-            "small_example_car_data.csv")
+    params.data_dir_train = os.path.join(os.getcwd(), "small_example_car_data.csv")
     dataset_name = "test_nlp"
     params.logdir = os.path.join(params.logdir, dataset_name)
     params.train_reader = None
