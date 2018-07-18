@@ -1,13 +1,13 @@
-import utils
 import argparse
-import tensorflow as tf
 import os
-from dataclass import mnist_data
-from modelclass import model
-from metrics import extra_metrics
-from dataclass import data
-from evalute import evaluate
+
+import tensorflow as tf
+
+import utils
+from dataclass import mnist_data, data
 from entity_rec import car_entities
+from metrics import extra_metrics
+from modelclass import model
 
 CONFIG = utils.import_config()
 
@@ -29,7 +29,8 @@ if __name__ == '__main__':
     parser.add_argument("--deepwide", type = bool,
                         default = True, help = "Whether to use a deepwide network.")
     parser.add_argument("--custom", type = bool,
-                        default = True, help = "Whether to use the custom network.")
+                        default = False,
+                        help = "Whether to use the custom network.")
     params = parser.parse_args()
 
     dataset_name = mnist_data.download()
@@ -52,6 +53,7 @@ if __name__ == '__main__':
     classifiers = []
     if params.baseline:
         baseline = tf.estimator.BaselineClassifier(model_dir = params.logdir + "/BaselineClassifier",
+
                                                    n_classes = car_entities.NUM_CLASSES)
         classifiers.append((baseline, 10))
 
@@ -63,7 +65,7 @@ if __name__ == '__main__':
                                                         "/simple_model_300x300",
                                             n_classes = car_entities.NUM_CLASSES,
                                             )
-        classifiers.append((simple, 10000))
+        classifiers.append((simple, 100))
 
     if params.deepwide:
         deepwide = tf.estimator.DNNLinearCombinedClassifier(model_dir = params.logdir + "/deep_wide_model_300x300",
@@ -82,7 +84,7 @@ if __name__ == '__main__':
         custom = tf.estimator.Estimator(model_fn = model.model_fn,
                                         model_dir = params.logdir + "/custom_model_fn",
                                         params = params)
-        classifiers.append((custom, 20000))
+        classifiers.append((custom, 200))
 
     tf.logging.set_verbosity('INFO')
 
@@ -103,4 +105,6 @@ if __name__ == '__main__':
 
         tf.estimator.train_and_evaluate(classifier, train_spec, eval_spec)
 
+        export_classifier(classifier, )
         # evaluate(classifier, params, result_dir='results.json')
+
