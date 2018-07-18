@@ -1,9 +1,9 @@
-import random
 import numpy as np
 import tensorflow as tf
-from . import utils  # pylint : ignore
+
 from entity_rec import car_entities
 from entity_rec.embedding import Language
+from . import utils  # pylint : ignore
 
 CONFIG = utils.import_config()
 NEDERLANDS = Language()
@@ -13,19 +13,22 @@ def input_fn(eval, use_validation_set, params):
     """Outputs a tuple containing a features tensor and a labels tensor
 
     Args:
-      eval: whether we are evaluating or training. Training generates episodes indefinitely, evaluating generates params.batches_per_evaluation.
-      use_validation_set: bool, if True then load the validation set, otherwise load the training set.
+      eval: whether we are evaluating or training. Training generates episodes indefinitely,
+      evaluating generates params.batches_per_evaluation.
+      use_validation_set: bool, if True then load the validation set, otherwise load the training
+      set.
       params: a dictionary of configuration parameters
 
     Returns:
       (features_t, labels_t)
     """
 
-    ds = tf.data.Dataset.from_generator(generator = lambda: episode_batch_generator(use_validation_set, params),
+    ds = tf.data.Dataset.from_generator(
+            generator = lambda: episode_batch_generator(use_validation_set, params),
 
-                                        output_types = (
-                                            tf.float32, tf.float32, tf.int32)
-                                        )
+            output_types = (
+                tf.float32, tf.float32, tf.int32)
+            )
     if eval:
         pass  # TODO: eval dataset
     else:
@@ -59,7 +62,8 @@ def episode_batch_generator(use_validation_set, params):
 def get_batch(use_validation_set, params, line_reader = None):
     """A batch of params.batch_size with datapoints
     The reason I did not use the recomened way with tf.data.FixedLengthRecordDataset
-    is that I think this is much more clear what is going happening. And it is easier to adapt to other needs.
+    is that I think this is much more clear what is going happening. And it is easier to adapt to
+    other needs.
 
     Args:
         use_validation_set: bool, whether to use the train or validation dataset
@@ -80,11 +84,11 @@ def get_batch(use_validation_set, params, line_reader = None):
 
     while len(labels) < params.batch_size:
         # get next line in csv file
-        line = line_reader.next().replace("\n", "").split(",")
+        line = line_reader.next().replace("\n", "").split(",")  # default for CSV
         if line[0] is '':
             raise StopIteration()
 
-        labels, deep, wide = interpert_line(line)
+        labels, deep, wide = interpret_line(line)
 
     assert len(labels) == len(deep) == len(
             wide), "the features/labels do not have the same datapoints in a batch"
@@ -95,15 +99,13 @@ def get_batch(use_validation_set, params, line_reader = None):
     return deep, wide, label
 
 
-def interpert_line(line):
+def interpret_line(line):
     """
-    it was:
-    # first column is label
-    labels.append(int(line[0]))
-    # the others are the pixel values of the digit
-    deep.append(line[1:])
-    # making other random features
-    wide.append(np.random.rand(params.extra_wide_features))
+
+    :param line:
+        The line from the data source to be interpreted
+    :return:
+        data ready for the model (features and labels)
     """
     labels = line[0]
     features = car_entities.make_features(line[1:], language = NEDERLANDS)

@@ -1,4 +1,5 @@
 import os
+
 from . import reader
 
 
@@ -14,16 +15,19 @@ def import_config():
 
 
 def get_linereader(use_validation_set, params):
-
     if params is None or params.train_reader is None:  # first call
-        config = import_config()
+
         if 'restart' not in params:
             params.restart = True
-
-        params.val_reader = reader.Reader(
-            params.restart, config["MNIST"]["test"]["csv"])
+        if use_validation_set:
+            params.val_reader = reader.Reader(
+                    params.restart,
+                    params["data_dir"]["val"],
+                    )
         params.train_reader = reader.Reader(
-            params.restart, config["MNIST"]["train"]["csv"])
+                params.restart,
+                params["data_dir"]["train"],
+                )
 
     if use_validation_set:
         return params.val_reader

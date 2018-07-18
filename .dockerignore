@@ -1,0 +1,4 @@
+./venv
+./preperation_files
+./entity_rec/model_weights*
+*__pycache__*
