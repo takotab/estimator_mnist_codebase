@@ -1,3 +1,5 @@
+import pickle
+
 import numpy as np
 import tensorflow as tf
 
@@ -33,12 +35,10 @@ for key in FEATURE_INFO:
     FEATURE_INFO[key] = tf.feature_column.numeric_column(key = key, shape = FEATURE_INFO[key])
 
 
-def make_features(sentence, language = None, params = None):
+def make_features(sentence, language = None):
     """
-
     :param sentence:
     :param language:
-    :param params:
     :return:
     """
 
@@ -58,16 +58,19 @@ def make_features(sentence, language = None, params = None):
 
 
 def predict(sentence, language = None, estimator = None):
-    if estimator is None:
-        car_estimator = make_estimator()
-
-    pred_label = car_estimator.evaluate(input_fn = features, params = params)
-    return CAR_INTENT[pred_label]
-
-
-def make_estimator():
-    # TODO: restore estimator
     raise NotImplementedError()
+    # TODO: import model and use to predict
+    # if estimator is None:
+    #     car_estimator = make_estimator()
+    # features = make_features(sentence)
+    # pred_label = car_estimator.predict(features)
+    # return CAR_INTENT[pred_label], car_estimator
+
+
+def make_estimator(export_dir = "first_try.pckl"):
+    with open(export_dir, 'r') as f:
+        estimator = pickle.load(f)
+    return estimator
 
 
 # actually a test
@@ -81,6 +84,7 @@ def test_make_features():
             "ik wil de Ford focus",
             "ik wil de Audi A3",
             ]
+
     for t in text:
         print(t)
         features = make_features(t)
@@ -88,3 +92,4 @@ def test_make_features():
             print(key, features[key].shape)
             if key is "Wide":
                 print(features[key])
+        print(predict(t))
