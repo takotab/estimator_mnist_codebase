@@ -107,3 +107,5 @@ training_results/estimator/custom_model_fn/checkpoint
 *\training_results\*
 *tfevents*
 preperation_files/*
+serving_savemodel/*
+prepfiles.zip
