@@ -9,6 +9,9 @@ CONFIG = utils.import_config()
 NEDERLANDS = Language()
 
 
+# TODO: use tf.estimator.inputs.numpy_input_fn or tf.estimator.inputs.pandas_input_fn
+
+
 def input_fn(eval, use_validation_set, params):
     """Outputs a tuple containing a features tensor and a labels tensor
 
@@ -94,7 +97,7 @@ def get_batch(use_validation_set, params, line_reader = None):
         labels.append(_labels)
         deep.append(_deep)
         wide.append(_wide)
-        
+
     assert len(labels) == len(deep) == len(
             wide), "the features/labels do not have the same datapoints in a batch"
 
