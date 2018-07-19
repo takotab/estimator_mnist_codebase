@@ -105,5 +105,5 @@ if __name__ == '__main__':
 
         tf.estimator.train_and_evaluate(classifier, train_spec, eval_spec)
         print("training done")
-        export_esitimator(classifier, my_feature_columns_dict)
+        export_esitimator(classifier, params.feature_columns)
     # evaluate(classifier, params, result_dir='results.json')

@@ -1,12 +1,9 @@
 import tensorflow as tf
 
 
-def export_esitimator(estimator, servable_model_dir = "./serving_savemodel",
-                      **kwargs):
+def export_esitimator(estimator, params, serving_model_dir = "./serving_savemodel", ):
     # I step
-    feature_columns = []
-    for key in kwargs:
-        feature_columns += kwargs[key]
+    feature_columns = params
 
     # II step
     feature_spec = tf.feature_column.make_parse_example_spec(feature_columns)
@@ -14,11 +11,11 @@ def export_esitimator(estimator, servable_model_dir = "./serving_savemodel",
     # III step
     export_input_fn = \
         tf.estimator.export.build_parsing_serving_input_receiver_fn(
-        feature_spec)
+                feature_spec)
 
     # IV step
 
-    servable_model_path = estimator.export_savedmodel(servable_model_dir,
-                                                      export_input_fn)
+    serving_model_path = estimator.export_savedmodel(serving_model_dir,
+                                                     export_input_fn)
 
-    return servable_model_path
+    return serving_model_path
