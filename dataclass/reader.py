@@ -1,4 +1,3 @@
-
 class Reader:
     """
     Class that reads the data and restarts if it reaches the end.
@@ -13,9 +12,10 @@ class Reader:
         line = self.f.readline()
         if not line:
             if self.restart:
+                print("new epoch")
                 self.f.close()
                 self.f = open(self.filedir, "r")
                 line = self.f.readline()
             else:
                 return ''
-        return(line)
+        return (line)

@@ -1,7 +1,8 @@
-import tensorflow as tf
 import numpy as np
-from entity_rec.embedding import Language
+import tensorflow as tf
+
 from entity_rec import sub_embedding
+from entity_rec.embedding import Language
 
 CAR_INTENT = ["Opel Corsa",
               "Ford fiesta",
@@ -20,14 +21,16 @@ CAR_SUB_DICT = {
     "Ford" : 4,
     "Volvo": 5,
     "Corsa": 6,
-    "Audi" : 7,
+    "Audi" : 0,
     }
 
-max_words = 50
+# max_words = 50
 FEATURE_INFO = {
-    "Deep": [max_words * 300],  # 300 = size of embedding
-    "Wide": [max_words * len(CAR_SUB_DICT)],
+    "Deep": [300],  # 300 = size of embedding
+    "Wide": [len(CAR_SUB_DICT)],
     }
+for key in FEATURE_INFO:
+    FEATURE_INFO[key] = tf.feature_column.numeric_column(key = key, shape = FEATURE_INFO[key])
 
 
 def make_features(sentence, language = None, params = None):
@@ -44,7 +47,8 @@ def make_features(sentence, language = None, params = None):
 
     sentence_emb = language.get_sentence_embedding(sentence)
     sub_word = sub_embedding.add_subsentence(sentence, CAR_SUB_DICT)
-    # total_emb = np.concatenate((sentence_emb,sub_word),axis = 1)
+    sentence_emb = np.median(sentence_emb, axis = 0)
+    # total_emb = np.concatenate((sentence_emb, sub_word), axis = 1)
 
     features = {
         "Deep": sentence_emb,
@@ -64,3 +68,23 @@ def predict(sentence, language = None, estimator = None):
 def make_estimator():
     # TODO: restore estimator
     raise NotImplementedError()
+
+
+# actually a test
+def test_make_features():
+    text = ["ik wil de Opel Corsa",
+            "ik wil de Ford fiesta",
+            "ik wil de Opel Astra",
+            "ik wil de Volvo V60",
+            "ik wil de Tesla model S",
+            "ik wil de BMW 3 Series",
+            "ik wil de Ford focus",
+            "ik wil de Audi A3",
+            ]
+    for t in text:
+        print(t)
+        features = make_features(t)
+        for key in features:
+            print(key, features[key].shape)
+            if key is "Wide":
+                print(features[key])

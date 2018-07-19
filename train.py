@@ -18,18 +18,18 @@ if __name__ == '__main__':
     parser.add_argument("--logdir", type = str, default = "./training_results/",
                         help = "The path to the directory where models and metrics should be "
                                "logged.")
-    parser.add_argument("--batch_size", type = int, default = 32,
+    parser.add_argument("--batch_size", type = int, default = 1,
                         help = "The number of datapoint used in one gradient descent step.")
     parser.add_argument("--learning_rate", type = float,
                         default = 0.001, help = "The learning rate for training.")
     parser.add_argument("--dropout", type = float,
                         default = 0.5, help = "The dropout percentage to keep. 0 is no dropout.")
     parser.add_argument("--simple", type = bool,
-                        default = True, help = "Whether to use a simple dnn.")
+                        default = False, help = "Whether to use a simple dnn.")
     parser.add_argument("--baseline", type = bool,
                         default = False, help = "Whether to use a baseline.")
     parser.add_argument("--deepwide", type = bool,
-                        default = False, help = "Whether to use a deep-wide network.")
+                        default = True, help = "Whether to use a deep-wide network.")
     parser.add_argument("--custom", type = bool,
                         default = False,
                         help = "Whether to use the custom convectional network.")
@@ -42,15 +42,10 @@ if __name__ == '__main__':
     params.train_reader = None
     params.val_reader = None
 
-    sizes = car_entities.FEATURE_INFO
-
-    print(sizes)
+    my_feature_columns_dict = car_entities.FEATURE_INFO
 
     # Feature columns describe how to use the input.
-    my_feature_columns = []
-    for key in sizes:
-        my_feature_columns.append(
-                tf.feature_column.numeric_column(key = key, shape = sizes[key]))
+    my_feature_columns = list(my_feature_columns_dict.values())
 
     params.feature_columns = my_feature_columns
 
@@ -64,7 +59,7 @@ if __name__ == '__main__':
     if params.simple:
         simple = tf.estimator.DNNClassifier(hidden_units = [50, 10],
                                             feature_columns = [
-                                                my_feature_columns[0]],
+                                                my_feature_columns_dict["Deep"]],
                                             model_dir = params.logdir +
                                                         "/simple_model_50x10",
                                             n_classes = car_entities.NUM_CLASSES,
@@ -73,17 +68,17 @@ if __name__ == '__main__':
 
     if params.deepwide:
         deepwide = tf.estimator.DNNLinearCombinedClassifier(
-                model_dir = params.logdir + "/deep_wide_model_300x300",
+                model_dir = params.logdir + "/deep_wide_model_50x10",
                 linear_feature_columns = [
-                    my_feature_columns[1]],
+                    my_feature_columns_dict["Wide"]],
                 dnn_feature_columns = [
-                    my_feature_columns[0]],
+                    my_feature_columns_dict["Deep"]],
                 dnn_hidden_units = [
-                    300, 300],
+                    50, 10],
                 dnn_dropout = 0.5,
                 n_classes = car_entities.NUM_CLASSES
                 )
-        classifiers.append((deepwide, 1000))
+        classifiers.append((deepwide, 100))
 
     if params.custom:
         custom = tf.estimator.Estimator(model_fn = model.model_fn,
@@ -91,7 +86,7 @@ if __name__ == '__main__':
                                         params = params)
         classifiers.append((custom, 200))
 
-    tf.logging.set_verbosity('INFO')
+    tf.logging.set_verbosity('DEBUG')
 
     for classifier, max_steps in classifiers:
         classifier = tf.contrib.estimator.add_metrics(  # pylint: ignore
@@ -109,6 +104,6 @@ if __name__ == '__main__':
                                           start_delay_secs = 60 * 5)
 
         tf.estimator.train_and_evaluate(classifier, train_spec, eval_spec)
-
-        export_esitimator(classifier, sizes)
+        print("training done")
+        export_esitimator(classifier, my_feature_columns_dict)
     # evaluate(classifier, params, result_dir='results.json')

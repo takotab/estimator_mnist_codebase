@@ -32,9 +32,11 @@ def input_fn(eval, use_validation_set, params):
     if eval:
         pass  # TODO: eval dataset
     else:
-        ds.shuffle(60000)
+        pass
+        # ds.shuffle(60000)
+
     # 4 is arbitrary, a little pre-fetching helps speed things up
-    ds = ds.prefetch(100)
+    # ds = ds.prefetch(100)
 
     deep_t, wide_t, labels_t = ds.make_one_shot_iterator().get_next()
 
@@ -88,8 +90,11 @@ def get_batch(use_validation_set, params, line_reader = None):
         if line[0] is '':
             raise StopIteration()
 
-        labels, deep, wide = interpret_line(line)
-
+        _labels, _deep, _wide = interpret_line(line)
+        labels.append(_labels)
+        deep.append(_deep)
+        wide.append(_wide)
+        
     assert len(labels) == len(deep) == len(
             wide), "the features/labels do not have the same datapoints in a batch"
 
@@ -108,7 +113,7 @@ def interpret_line(line):
         data ready for the model (features and labels)
     """
     labels = line[0]
-    features = car_entities.make_features(line[1:], language = NEDERLANDS)
+    features = car_entities.make_features(line[1], language = NEDERLANDS)
     deep = features["Deep"]
     wide = features["Wide"]
     return labels, deep, wide
